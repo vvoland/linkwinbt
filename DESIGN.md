@@ -14,11 +14,13 @@ The solution is to change the Link Key on Linux to match the Link Key on Windows
 For this we need the `SYSTEM` registry file from C:\Windows\System32\config\SYSTEM
 We also need `chntpw` to read the Windows registry on Linux.
 
-## Steps
+## Requirements
 
 ### Pair bluetooth device on Linux
 
 ### Pair bluetooth device on Windows
+
+## Steps
 
 ### Get BT controller MAC address
 
