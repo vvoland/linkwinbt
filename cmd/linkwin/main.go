@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 
 	"grono.dev/winbt/bt"
@@ -27,9 +28,8 @@ func run(ctx context.Context) error {
 		return err
 	}
 	if len(os.Args) < 2 {
-		return errors.New("usage: go run main.go <path-to-SYSTEM>")
+		return errors.New("usage: go run main.go <windows-dir or SYSTEM file path>")
 	}
-	systemRegPath := os.Args[1]
 
 	btController, err := pickController(ctx)
 	if err != nil {
@@ -41,7 +41,9 @@ func run(ctx context.Context) error {
 		return err
 	}
 
-	reg, err := winreg.Open(systemRegPath)
+	hivePath := parsePath(os.Args[1])
+
+	reg, err := winreg.Open(hivePath)
 	if err != nil {
 		return err
 	}
@@ -73,6 +75,20 @@ func run(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func parsePath(path string) string {
+	fi, err := os.Lstat(path)
+	if err != nil {
+		return ""
+	}
+
+	// Assume Windows installation directory was given
+	if fi.IsDir() {
+		return filepath.Join(path, "System32", "config", "SYSTEM")
+	}
+
+	return path
 }
 
 func pickController(ctx context.Context) (*bt.Controller, error) {
