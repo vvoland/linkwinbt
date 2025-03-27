@@ -105,6 +105,6 @@ PINLength=0
 ...
 ```
 
-and replace the link key with the one we got from the dump (without commans and hex: prefix).
+and replace the uppercased link key with the one we got from the dump (without commans and hex: prefix)
 
 

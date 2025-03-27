@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 
 	"grono.dev/winbt/bt"
+	"grono.dev/winbt/winreg"
 )
 
 func main() {
@@ -19,7 +21,7 @@ func main() {
 
 func run(ctx context.Context) error {
 	if len(os.Args) < 2 {
-		return fmt.Errorf("Usage: go run main.go <path-to-SYSTEM>")
+		return errors.New("usage: go run main.go <path-to-SYSTEM>")
 	}
 	systemRegPath := os.Args[1]
 

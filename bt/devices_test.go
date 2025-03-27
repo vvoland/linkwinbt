@@ -3,6 +3,7 @@ package bt
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"gotest.tools/v3/assert"
@@ -11,10 +12,10 @@ import (
 
 func TestDevices(t *testing.T) {
 	tmpDir := t.TempDir()
+
 	origVarLibBluetooth := varLibBluetooth
 	varLibBluetooth = tmpDir
 	defer func() { varLibBluetooth = origVarLibBluetooth }()
-
 	testMac := "11:22:33:44:55:66"
 	controllerDir := filepath.Join(tmpDir, testMac)
 	assert.NilError(t, os.MkdirAll(controllerDir, 0755))
@@ -29,7 +30,15 @@ func TestDevices(t *testing.T) {
 	for _, device := range testDevices {
 		deviceDir := filepath.Join(controllerDir, device.mac)
 		assert.NilError(t, os.MkdirAll(deviceDir, 0755))
-		assert.NilError(t, os.WriteFile(filepath.Join(deviceDir, "info"), []byte("Name="+device.name+"\n"), 0644))
+		assert.NilError(t, os.WriteFile(filepath.Join(deviceDir, "info"), []byte(`
+[General]
+Name=`+device.name+`
+
+[LinkKey]
+Key = 00000000000000000000000000000000
+Type=4
+PINLength=0
+`), 0644))
 	}
 
 	f, err := os.Create(filepath.Join(controllerDir, "not-a-device"))
@@ -53,4 +62,17 @@ func TestDevices(t *testing.T) {
 			assert.Check(t, cmp.Equal(device.Name, expected.name))
 		}
 	}
+
+	t.Run("SetLinkKey", func(t *testing.T) {
+		device := devices[0]
+		err := device.SetLinkKey("1234567890123456")
+		assert.NilError(t, err)
+
+		// Check if the link key was set correctly
+		infoData, err := os.ReadFile(filepath.Join(controllerDir, device.Mac, "info"))
+		assert.NilError(t, err)
+
+		assert.Check(t, strings.Contains(string(infoData), "[LinkKey]"))
+		assert.Check(t, strings.Contains(string(infoData), "Key=1234567890123456"))
+	})
 }
