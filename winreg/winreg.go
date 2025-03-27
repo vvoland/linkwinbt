@@ -76,6 +76,7 @@ func (r *Registry) GetBluetoothLinkKey(controllerMAC, deviceMAC string) (string,
 
 	searchSection := fmt.Sprintf("%s\\%s", "ControlSet001\\Services\\BTHPORT\\Parameters\\Keys", controllerMAC)
 	searchDevice := fmt.Sprintf(`"%s"=hex:`, deviceMAC)
+
 	inSection := false
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -83,6 +84,7 @@ func (r *Registry) GetBluetoothLinkKey(controllerMAC, deviceMAC string) (string,
 
 		if strings.Contains(line, searchSection) {
 			inSection = true
+			continue
 		}
 		if !inSection {
 			continue
@@ -110,6 +112,5 @@ func normalizeMAC(mac string) string {
 	mac = strings.ReplaceAll(mac, ":", "")
 	mac = strings.ReplaceAll(mac, "-", "")
 
-	// Convert to uppercase
-	return strings.ToUpper(mac)
+	return strings.ToLower(mac)
 }

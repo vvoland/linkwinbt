@@ -83,7 +83,7 @@ func (c *Controller) Devices() ([]Device, error) {
 	return devices, nil
 }
 
-func (d *Device) SetLinkKey(linkKeyHex string) error {
+func (d *Device) SetLinkKey(linkKeyHex LinkKey) error {
 	if d.controller == nil {
 		return fmt.Errorf("device not associated with a controller")
 	}
@@ -139,7 +139,7 @@ func (d *Device) SetLinkKey(linkKeyHex string) error {
 
 		if k == "Key" {
 			// Replace the existing link key
-			lines[i] = "Key=" + linkKeyHex
+			lines[i] = "Key=" + linkKeyHex.String()
 			linkKeyFound = true
 			break
 		}
