@@ -2,7 +2,9 @@ package winreg
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
@@ -11,41 +13,58 @@ import (
 func Check() error {
 	_, err := exec.LookPath("reged")
 	if err != nil {
-		return fmt.Errorf("reged not found: %w", err)
+		return fmt.Errorf("reged command not found: %w", err)
 	}
 	return nil
 }
 
 // Registry represents a Windows registry hive file
 type Registry struct {
-	file *os.File
+	dump bytes.Buffer
 }
 
 // Open opens a Windows registry hive file
 func Open(path string) (*Registry, error) {
-	file, err := os.CreateTemp("", "winreg-dump-*.reg")
+	// Create a copy of the registry file so that we don't make the `reged`
+	// operate on the original file just in case.
+	copyFile, err := createTmpCopy(path)
+	if err != nil {
+		return nil, err
+	}
+	defer copyFile.Close()
+
+	cmd := exec.Command("reged", "-x", copyFile.Name(), "\\ControlSet001\\Services\\BTHPORT\\Parameters\\Keys", "\\", "/dev/stdout")
+
+	reg := &Registry{}
+
+	var stderr bytes.Buffer
+	cmd.Stdout = &reg.dump
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		return nil, fmt.Errorf("failed to dump registry: %w, stderr %s", err, stderr.String())
+	}
+
+	return reg, nil
+}
+
+func createTmpCopy(path string) (*os.File, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open registry file: %w", err)
+	}
+	defer f.Close()
+
+	tmpCopy, err := os.CreateTemp("", "system-hive-*.reg")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create temporary file: %w", err)
 	}
 
-	cmd := exec.Command("reged", "-x", path, "\\ControlSet001\\Services\\BTHPORT\\Parameters\\Keys", "\\", file.Name())
-	if out, err := cmd.CombinedOutput(); err != nil {
-		return nil, fmt.Errorf("failed to dump registry: %w, out: %s", err, string(out))
+	if _, err := io.Copy(tmpCopy, f); err != nil {
+		return nil, fmt.Errorf("failed to copy registry file: %w", err)
 	}
 
-	return &Registry{
-		file: file,
-	}, nil
-}
-
-// Close closes the registry
-func (r *Registry) Close() error {
-	if r.file == nil {
-		return nil
-	}
-	err := r.file.Close()
-	r.file = nil
-	return err
+	return tmpCopy, nil
 }
 
 // GetBluetoothLinkKey extracts the Bluetooth link key for a specific controller-device pair
@@ -68,12 +87,13 @@ func (r *Registry) Close() error {
 // ...
 // ```
 func (r *Registry) GetBluetoothLinkKey(controllerMAC, deviceMAC string) (string, error) {
-	// Normalize MAC addresses to Windows format (uppercase, no colons)
+	// Normalize MAC addresses to Windows format (lowercase, no colons)
 	controllerMAC = normalizeMAC(controllerMAC)
 	deviceMAC = normalizeMAC(deviceMAC)
 
-	scanner := bufio.NewScanner(r.file)
+	scanner := bufio.NewScanner(bytes.NewReader(r.dump.Bytes()))
 
+	controllerFound := false
 	searchSection := fmt.Sprintf("%s\\%s", "ControlSet001\\Services\\BTHPORT\\Parameters\\Keys", controllerMAC)
 	searchDevice := fmt.Sprintf(`"%s"=hex:`, deviceMAC)
 
@@ -84,6 +104,7 @@ func (r *Registry) GetBluetoothLinkKey(controllerMAC, deviceMAC string) (string,
 
 		if strings.Contains(line, searchSection) {
 			inSection = true
+			controllerFound = true
 			continue
 		}
 		if !inSection {
@@ -96,12 +117,16 @@ func (r *Registry) GetBluetoothLinkKey(controllerMAC, deviceMAC string) (string,
 		}
 
 		if strings.Contains(line, searchDevice) {
-			_, v, ok := strings.Cut(line, "hex:")
+			_, v, ok := strings.Cut(line, "=hex:")
 			if !ok {
 				continue
 			}
-			return v, nil
+			return "hex:" + v, nil
 		}
+	}
+
+	if !controllerFound {
+		return "", fmt.Errorf("controller not found in registry")
 	}
 
 	return "", fmt.Errorf("device not found in registry")

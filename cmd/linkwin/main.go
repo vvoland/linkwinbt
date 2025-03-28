@@ -47,7 +47,6 @@ func run(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	defer reg.Close()
 
 	linkKeyString, err := reg.GetBluetoothLinkKey(btController.Mac, btDevice.Mac)
 	if err != nil {
