@@ -103,7 +103,7 @@ func pickController(ctx context.Context) (*bt.Controller, error) {
 	case 1:
 		return &controllers[0], nil
 	default:
-		fmt.Println(renderControllerList(controllers))
+		renderControllerList(controllers)
 		idx, err := getUserSelection("Enter controller number (or q to quit): ", len(controllers))
 		if err != nil {
 			return nil, err
@@ -124,7 +124,7 @@ func pickDevice(ctx context.Context, controller *bt.Controller) (*bt.Device, err
 	case 1:
 		return &devices[0], nil
 	default:
-		fmt.Println(renderDeviceList(devices))
+		renderDeviceList(devices)
 		idx, err := getUserSelection("Enter device number (or q to quit): ", len(devices))
 		if err != nil {
 			return nil, err

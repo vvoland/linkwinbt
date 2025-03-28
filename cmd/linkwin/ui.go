@@ -4,15 +4,15 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/lipgloss/v2"
 	"grono.dev/winbt/bt"
 )
 
 var (
 	titleStyle = lipgloss.NewStyle().
 			Bold(true).
-			Foreground(lipgloss.ANSIColor(7)).
-			Background(lipgloss.ANSIColor(0)).
+			Foreground(lipgloss.ANSIColor(0)).
+			Background(lipgloss.ANSIColor(7)).
 			Padding(0, 1)
 	deviceStyle = lipgloss.NewStyle().
 			Padding(0, 2)
@@ -28,7 +28,7 @@ var (
 )
 
 // renderDeviceList creates a styled list of devices
-func renderDeviceList(devices []bt.Device) string {
+func renderDeviceList(devices []bt.Device) {
 	var s strings.Builder
 
 	s.WriteString(titleStyle.Render(" Select Bluetooth Device "))
@@ -44,10 +44,10 @@ func renderDeviceList(devices []bt.Device) string {
 	s.WriteString("\n")
 	s.WriteString(infoStyle.Render("Enter the number of the device to select, or 'q' to cancel"))
 
-	return s.String()
+	lipgloss.Println(s.String())
 }
 
-func renderControllerList(controllers []bt.Controller) string {
+func renderControllerList(controllers []bt.Controller) {
 	var s strings.Builder
 
 	s.WriteString(titleStyle.Render(" Select Bluetooth Controller "))
@@ -62,5 +62,5 @@ func renderControllerList(controllers []bt.Controller) string {
 	s.WriteString("\n")
 	s.WriteString(infoStyle.Render("Enter the number of the controller to select, or 'q' to cancel"))
 
-	return s.String()
+	lipgloss.Println(s.String())
 }
