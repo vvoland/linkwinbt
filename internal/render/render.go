@@ -1,4 +1,4 @@
-package main
+package render
 
 import (
 	"strconv"
@@ -27,8 +27,8 @@ var (
 			Foreground(lipgloss.ANSIColor(4))
 )
 
-// renderDeviceList creates a styled list of devices
-func renderDeviceList(devices []bt.Device) {
+// DeviceList prints a styled list of devices
+func DeviceList(devices []bt.Device) {
 	var s strings.Builder
 
 	s.WriteString(titleStyle.Render(" Select Bluetooth Device "))
@@ -47,7 +47,8 @@ func renderDeviceList(devices []bt.Device) {
 	lipgloss.Println(s.String())
 }
 
-func renderControllerList(controllers []bt.Controller) {
+// ControllerList prints a styled list of controllers
+func ControllerList(controllers []bt.Controller) {
 	var s strings.Builder
 
 	s.WriteString(titleStyle.Render(" Select Bluetooth Controller "))
