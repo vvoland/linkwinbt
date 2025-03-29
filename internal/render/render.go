@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss/v2"
-	"grono.dev/winbt/bt"
+	"grono.dev/linkwinbt/bt"
 )
 
 var (

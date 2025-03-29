@@ -11,10 +11,10 @@ RUN --mount=type=cache,target=/go/pkg/mod \
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=bind,source=. \
-    CGO_ENABLED=0 GOOS=linux go build -o /linkwin ./cmd/linkwin/main.go
+    CGO_ENABLED=0 GOOS=linux go build -o /linkwinbt ./cmd/linkwinbt/main.go
 
 # final
 FROM alpine:latest
 RUN apk add chntpw
-COPY --from=build /linkwin /linkwin
-ENTRYPOINT ["/linkwin"]
+COPY --from=build /linkwinbt /linkwinbt
+ENTRYPOINT ["/linkwinbt"]

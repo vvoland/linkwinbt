@@ -1,4 +1,4 @@
-module grono.dev/winbt
+module grono.dev/linkwinbt
 
 go 1.24.0
 

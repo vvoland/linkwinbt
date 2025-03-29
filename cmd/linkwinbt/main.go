@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"grono.dev/winbt/bt"
-	"grono.dev/winbt/internal/render"
-	"grono.dev/winbt/winreg"
+	"grono.dev/linkwinbt/bt"
+	"grono.dev/linkwinbt/internal/render"
+	"grono.dev/linkwinbt/winreg"
 )
 
 var dry = true
