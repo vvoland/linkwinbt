@@ -83,9 +83,20 @@ func parsePath(path string) string {
 		return ""
 	}
 
-	// Assume Windows installation directory was given
+	// Assume a path inside a Windows installation directory was given
 	if fi.IsDir() {
-		return filepath.Join(path, "System32", "config", "SYSTEM")
+		// Full path is C:\Windows\System32\config\SYSTEM
+		// Handle cases where C:\, C:\Windows, C:\Windows\System32 was provided.
+		for _, p := range []string{
+			filepath.Join("config", "SYSTEM"),
+			filepath.Join("System32", "config", "SYSTEM"),
+		} {
+			if _, err := os.Lstat(filepath.Join(path, p)); err == nil {
+				return filepath.Join(path, p)
+			}
+		}
+
+		return filepath.Join("Windows", "System32", "config", "SYSTEM")
 	}
 
 	return path
