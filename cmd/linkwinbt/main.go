@@ -32,12 +32,12 @@ func run(ctx context.Context) error {
 		return errors.New("usage: go run main.go <windows-dir or SYSTEM file path>")
 	}
 
-	btController, err := pickController(ctx)
+	btController, err := pickController()
 	if err != nil {
 		return err
 	}
 
-	btDevice, err := pickDevice(ctx, btController)
+	btDevice, err := pickDevice(btController)
 	if err != nil {
 		return err
 	}
@@ -102,7 +102,7 @@ func parsePath(path string) string {
 	return path
 }
 
-func pickController(ctx context.Context) (*bt.Controller, error) {
+func pickController() (*bt.Controller, error) {
 	controllers, err := bt.Controllers()
 	if err != nil {
 		return nil, err
@@ -123,7 +123,7 @@ func pickController(ctx context.Context) (*bt.Controller, error) {
 	}
 }
 
-func pickDevice(ctx context.Context, controller *bt.Controller) (*bt.Device, error) {
+func pickDevice(controller *bt.Controller) (*bt.Device, error) {
 	devices, err := controller.Devices()
 	if err != nil {
 		return nil, err
