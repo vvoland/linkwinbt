@@ -151,7 +151,7 @@ func (d *Device) SetLinkKey(linkKeyHex LinkKey) error {
 
 	// Write the updated info file
 	updatedInfo := strings.Join(lines, "\n")
-	fw, err := root.OpenFile("info", os.O_WRONLY, stat.Mode())
+	fw, err := root.OpenFile("info", os.O_WRONLY|os.O_TRUNC, stat.Mode())
 	if err != nil {
 		return fmt.Errorf("failed to write updated device info file: %w", err)
 	}

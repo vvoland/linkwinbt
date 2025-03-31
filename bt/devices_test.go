@@ -3,7 +3,6 @@ package bt
 import (
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"gotest.tools/v3/assert"
@@ -35,7 +34,7 @@ func TestDevices(t *testing.T) {
 Name=`+device.name+`
 
 [LinkKey]
-Key = 00000000000000000000000000000000
+Key=00000000000000000000000000000000
 Type=4
 PINLength=0
 `), 0644))
@@ -64,7 +63,7 @@ PINLength=0
 	}
 
 	t.Run("SetLinkKey", func(t *testing.T) {
-		device := devices[0]
+		device := deviceMap["AA:BB:CC:DD:EE:FF"]
 		err := device.SetLinkKey("1234567890123456")
 		assert.NilError(t, err)
 
@@ -72,7 +71,14 @@ PINLength=0
 		infoData, err := os.ReadFile(filepath.Join(controllerDir, device.Mac, "info"))
 		assert.NilError(t, err)
 
-		assert.Check(t, strings.Contains(string(infoData), "[LinkKey]"))
-		assert.Check(t, strings.Contains(string(infoData), "Key=1234567890123456"))
+		assert.Check(t, cmp.Equal(string(infoData), `
+[General]
+Name=Device1
+
+[LinkKey]
+Key=1234567890123456
+Type=4
+PINLength=0
+`))
 	})
 }
