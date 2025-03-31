@@ -147,7 +147,10 @@ func pickDevice(ctx context.Context, controller *bt.Controller) (*bt.Device, err
 func getUserSelection(prompt string, itemCount int) (int, error) {
 	fmt.Print(prompt)
 	var input string
-	fmt.Scanln(&input)
+
+	if _, err := fmt.Scanln(&input); err != nil {
+		return -1, err
+	}
 
 	if input == "q" || input == "Q" {
 		return -1, errors.New("selection canceled")
