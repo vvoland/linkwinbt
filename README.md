@@ -3,7 +3,9 @@
 [![License](https://img.shields.io/github/license/vvoland/linkwinbt)](LICENSE)
 
 
-LinkWinBT is a utility that solves the Bluetooth pairing issue in dual-boot Linux/Windows systems by synchronizing Bluetooth link keys between the two operating systems.
+LinkWinBT is a utility that extracts the Bluetooth pairing from the Windows registry and applies it to your Linux Bluetooth configuration.
+
+It allows to have the same Bluetooth device paired on both Linux and Windows.
 
 ## Problem
 
