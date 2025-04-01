@@ -6,6 +6,13 @@ import (
 	"os/exec"
 )
 
+func CanRestart() bool {
+	if _, err := exec.LookPath("systemctl"); err != nil {
+		return false
+	}
+	return true
+}
+
 func Restart(ctx context.Context) error {
 	cmd := exec.CommandContext(ctx, "systemctl", "restart", "bluetooth")
 

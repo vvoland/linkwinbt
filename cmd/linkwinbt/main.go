@@ -72,9 +72,14 @@ func run(ctx context.Context) error {
 		return err
 	}
 
-	err = bt.Restart(ctx)
-	if err != nil {
-		return err
+	if bt.CanRestart() {
+		err = bt.Restart(ctx)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "Failed to restart bluetooth: ", err.Error())
+		}
+	} else {
+		fmt.Println("\nPlease restart your bluetooth service:")
+		fmt.Println("  sudo systemctl restart bluetooth")
 	}
 
 	return nil
