@@ -99,7 +99,7 @@ func parsePath(path string) string {
 			}
 		}
 
-		return filepath.Join("Windows", "System32", "config", "SYSTEM")
+		return filepath.Join(path, "Windows", "System32", "config", "SYSTEM")
 	}
 
 	return path
