@@ -45,6 +45,9 @@ $ sudo mount /dev/sdXY /mnt
 
 # Run the container
 $ docker run --rm -it -v /mnt:/windows:ro -v /var/lib/bluetooth:/var/lib/bluetooth vlnd/linkwinbt /windows
+
+# Restart bluetooth
+$ sudo systemctl restart bluetooth
 ```
 
 ### Manual
