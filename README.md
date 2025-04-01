@@ -7,6 +7,12 @@ LinkWinBT is a utility that extracts the Bluetooth pairing from the Windows regi
 
 It allows to have the same Bluetooth device paired on both Linux and Windows.
 
+
+
+https://github.com/user-attachments/assets/505bd515-0ed4-4e51-adb1-58dc663526bd
+
+
+
 ## Problem
 
 When using a dual-boot system with Linux and Windows, Bluetooth devices cannot be used seamlessly across both operating systems. This is because each OS generates and stores a unique link key for the same Bluetooth device but use the same Bluetooth controller so the linked device can't distinguish between the two systems.
