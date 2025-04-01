@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -13,7 +14,7 @@ import (
 	"grono.dev/linkwinbt/winreg"
 )
 
-var dry = true
+var dry = false
 
 func main() {
 	ctx := context.Background()
@@ -32,19 +33,21 @@ func run(ctx context.Context) error {
 		return errors.New("usage: go run main.go <windows-dir or SYSTEM file path>")
 	}
 
+	flag.BoolVar(&dry, "dry", false, "Dry mode - only print the extracted link key (default: false)")
+	flag.Parse()
+
+	hivePath := parsePath(os.Args[1])
+	reg, err := winreg.Open(hivePath)
+	if err != nil {
+		return err
+	}
+
 	btController, err := pickController()
 	if err != nil {
 		return err
 	}
 
 	btDevice, err := pickDevice(btController)
-	if err != nil {
-		return err
-	}
-
-	hivePath := parsePath(os.Args[1])
-
-	reg, err := winreg.Open(hivePath)
 	if err != nil {
 		return err
 	}
