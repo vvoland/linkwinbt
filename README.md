@@ -50,6 +50,27 @@ $ docker run --rm -it -v /mnt:/windows:ro -v /var/lib/bluetooth:/var/lib/bluetoo
 $ sudo systemctl restart bluetooth
 ```
 
+> **Note:** You can further restrict the container to limit its access to your system.
+
+```bash
+# No network access, mount only one registry file
+$ docker run --rm -it \
+  --network none \   # No network access
+  -v /mnt/Windows/System32/config/SYSTEM:/windows:ro \
+  -v /var/lib/bluetooth:/var/lib/bluetooth \
+  vlnd/linkwinbt /windows
+
+
+# Same as above but only print the link key
+# You will need to modify the bluetooth files manually
+$ docker run --rm -it \
+  --network none \
+  -v /mnt/Windows/System32/config/SYSTEM:/windows:ro \
+  -v /var/lib/bluetooth:/var/lib/bluetooth:ro \
+  vlnd/linkwinbt -dry /windows
+```
+
+
 ### Manual
 
 1. Install
