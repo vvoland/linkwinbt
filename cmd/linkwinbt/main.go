@@ -26,17 +26,19 @@ func main() {
 }
 
 func run(ctx context.Context) error {
-	if err := winreg.Check(); err != nil {
-		return err
-	}
-	if len(os.Args) < 2 {
-		return errors.New("usage: go run main.go <windows-dir or SYSTEM file path>")
-	}
-
 	flag.BoolVar(&dry, "dry", false, "Dry mode - only print the extracted link key (default: false)")
 	flag.Parse()
 
-	hivePath := parsePath(os.Args[1])
+	args := flag.Args()
+	if len(args) != 1 {
+		return errors.New("usage: " + os.Args[0] + " [-dry] <windows-dir or SYSTEM file path>")
+	}
+
+	if err := winreg.Check(); err != nil {
+		return err
+	}
+
+	hivePath := parsePath(args[0])
 	reg, err := winreg.Open(hivePath)
 	if err != nil {
 		return err
