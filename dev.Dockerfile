@@ -1,5 +1,5 @@
 # build
-FROM golang:1.24-alpine AS golang
+FROM golang:1.25-alpine AS golang
 
 # golangci-lint
 FROM golang AS golangci-lint
