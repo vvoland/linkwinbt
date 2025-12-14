@@ -1,0 +1,61 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    name: Build Binaries
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+          - arch: arm64
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build binary
+        run: |
+          docker buildx build . \
+            --target binary \
+            --build-arg TARGETOS=linux \
+            --build-arg TARGETARCH=${{ matrix.arch }} \
+            --output type=local,dest=build \
+            --cache-from type=gha \
+            --cache-to type=gha,mode=max
+
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: linkwinbt-linux-${{ matrix.arch }}
+          path: build/linkwinbt*
+          retention-days: 1
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v6
+        with:
+          path: artifacts
+
+      - name: Create Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          gh release create "$TAG" \
+            --title "$TAG" \
+            --draft \
+            --generate-notes \
+            artifacts/**/*
+
