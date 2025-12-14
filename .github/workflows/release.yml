@@ -20,6 +20,10 @@ jobs:
   build:
     name: Build Binaries
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      attestations: write
+      contents: read
     strategy:
       matrix:
         include:
@@ -42,6 +46,20 @@ jobs:
           for file in ./build/*.json; do
             mv "$file" "./build/${NAME}.$(basename "$file")"
           done
+
+      - name: Attest build provenance
+        uses: actions/attest@v3
+        with:
+          subject-path: build/${{ env.NAME }}
+          predicate-type: https://slsa.dev/provenance/v0.2
+          predicate-path: build/${{ env.NAME }}.provenance.json
+
+      - name: Attest SBOM
+        uses: actions/attest@v3
+        with:
+          subject-path: build/${{ env.NAME }}
+          predicate-type: https://spdx.dev/Document
+          predicate-path: build/${{ env.NAME }}.sbom.spdx.json
 
       - name: Upload binary artifact
         uses: actions/upload-artifact@v6

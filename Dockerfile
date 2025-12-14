@@ -1,6 +1,5 @@
 # build
 FROM golang:1.25.5-alpine AS build
-ARG BUILDKIT_SBOM_SCAN_STAGE=true
 
 WORKDIR /out
 WORKDIR /src
