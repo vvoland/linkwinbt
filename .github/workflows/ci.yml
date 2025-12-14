@@ -1,0 +1,91 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.5'
+          cache-dependency-path: go.sum
+      
+      - name: Run tests
+        run: go test ./...
+
+  vet:
+    name: Vet
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.5'
+          cache-dependency-path: go.sum
+      
+      - name: Run go vet
+        run: go vet ./...
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.5'
+          cache-dependency-path: go.sum
+      
+      - name: Install golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.64
+      
+      - name: Run golangci-lint
+        run: golangci-lint run ./...
+
+  gomod:
+    name: Go Mod Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.5'
+          cache-dependency-path: go.sum
+      
+      - name: Run go mod tidy
+        run: go mod tidy
+      
+      - name: Check for changes
+        run: |
+          git diff --exit-code go.mod go.sum || (echo "go.mod or go.sum has uncommitted changes after 'go mod tidy'" && exit 1)
+
+  build:
+    name: Build Binary
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Build binary target
+        run: |
+          docker buildx build . \
+            --target binary \
+            --output type=local,dest=build \
+            --cache-from type=gha \
+            --cache-to type=gha,mode=max \
+
