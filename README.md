@@ -73,13 +73,38 @@ $ docker run --rm -it \
 
 ### Manual
 
-1. Install
+1. Obtain binary
+
+There are multiple ways to obtain the binary.
+
+
+### Github release
+
+Download from: [https://github.com/vvoland/linkwinbt/releases](https://github.com/vvoland/linkwinbt/releases)
+
+### Build with `docker buildx bake`
+
+```bash
+docker buildx bake "https://github.com/vvoland/linkwinbt.git?tag=v<VERSION>"
+# Resulting binary is: ./build/linkwinbt
+```
+
+> [!TIP]
+> The binary _should_ be reproducible and match the one from the Github release, you can verify it with:
+>
+> ```bash
+> gh attestation verify --owner vvoland --predicate-type "https://slsa.dev/provenance/v0.2" ./build/linkwinbt
+> ```
+
+
+### Build with `go install` (not recommended - the binary won't be reproducible)
 
 ```bash
 go install grono.dev/linkwinbt/cmd/linkwinbt@latest
 ```
 
-1. Run LinkWinBT with the path to your Windows installation or SYSTEM registry file:
+
+2. Run linkwinbt with the path to your Windows installation or SYSTEM registry file:
 
 ```bash
 sudo linkwinbt /path/to/windows
