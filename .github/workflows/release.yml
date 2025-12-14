@@ -53,9 +53,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG=${GITHUB_REF#refs/tags/}
-          gh release create "$TAG" \
+          # Find all files in artifacts directory
+          FILES=$(find artifacts -type f)
+          echo "Files: ${FILES}"
+
+          # Create release with all artifact files
+          echo "$FILES" | xargs gh release create "$TAG" \
             --title "$TAG" \
             --draft \
-            --generate-notes \
-            artifacts/**/*
-
+            --generate-notes
