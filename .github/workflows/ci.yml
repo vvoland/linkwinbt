@@ -112,11 +112,21 @@ jobs:
             --cache-from type=gha \
             --cache-to type=gha,mode=max
 
-  success:
-    name: Success
+  passed:
+    name: CI passed
     needs: [test, vet, lint, gomod, build]
     runs-on: ubuntu-latest
+    if: always()
     steps:
-      - run:
+      - name: Check all jobs succeeded
+        run: |
+          if [ "${{ needs.test.result }}" != "success" ] || \
+             [ "${{ needs.vet.result }}" != "success" ] || \
+             [ "${{ needs.lint.result }}" != "success" ] || \
+             [ "${{ needs.gomod.result }}" != "success" ] || \
+             [ "${{ needs.build.result }}" != "success" ]; then
+            echo "❌ One or more CI jobs failed"
+            exit 1
+          fi
           echo "✅ CI passed"
 
