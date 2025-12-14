@@ -95,5 +95,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run:
-        echo "✅ CI passed"
+          echo "✅ CI passed"
 
