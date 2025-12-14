@@ -87,5 +87,13 @@ jobs:
             --target binary \
             --output type=local,dest=build \
             --cache-from type=gha \
-            --cache-to type=gha,mode=max \
+            --cache-to type=gha,mode=max
+
+  success:
+    name: Success
+    needs: [test, vet, lint, gomod, build]
+    runs-on: ubuntu-latest
+    steps:
+      - run:
+        echo "✅ CI passed"
 
