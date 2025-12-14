@@ -28,7 +28,7 @@ func TestControllers(t *testing.T) {
 	// Create a file (should be ignored)
 	f, err := os.Create(filepath.Join(tmpDir, "not-a-controller"))
 	assert.NilError(t, err)
-	f.Close()
+	_ = f.Close()
 
 	// Test Controllers function
 	controllers, err := Controllers()

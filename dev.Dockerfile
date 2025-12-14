@@ -1,11 +1,8 @@
-# build
+# golang
 FROM golang:1.25.5-alpine AS golang
 
 # golangci-lint
-FROM golang AS golangci-lint
-RUN apk add git
-WORKDIR /go/src
-RUN go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64
+FROM golangci/golangci-lint:v2.7.2 AS golangci-lint
 
 # base
 FROM golang AS base
@@ -35,13 +32,14 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     go vet ./...
 
 # lint
-FROM base AS lint
-COPY --link --from=golangci-lint /go/bin/golangci-lint /usr/bin/golangci-lint
+FROM golangci-lint AS lint
 
-RUN --mount=type=cache,target=/go/pkg/mod \
-    --mount=type=cache,target=/root/.cache/go-build \
-    --mount=type=bind,source=. \
-    golangci-lint run ./...
+RUN --mount=type=cache,target=/cache \
+    --mount=type=bind,source=.,rw \
+    GOCACHE=/cache/go-build \
+    GOMODCACHE=/cache/mod \
+    GOLANGCI_LINT_CACHE=/cache/golangci-lint \
+    golangci-lint run --color=always ./...
 
 # gomod
 FROM base-with-git AS gomod

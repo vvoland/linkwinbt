@@ -42,7 +42,7 @@ PINLength=0
 
 	f, err := os.Create(filepath.Join(controllerDir, "not-a-device"))
 	assert.NilError(t, err)
-	f.Close()
+	_ = f.Close()
 
 	controller := Controller{Mac: testMac}
 	devices, err := controller.Devices()
