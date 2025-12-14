@@ -21,9 +21,23 @@ jobs:
       - name: Run tests with coverage
         run: go test -coverprofile=coverage.out -covermode=atomic ./...
       
-      - name: Display coverage
-        run: go tool cover -func=coverage.out
-      
+      - name: Generate coverage summary
+        run: |
+          echo "## Test Coverage Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Get overall coverage
+          COVERAGE=$(go tool cover -func=coverage.out | grep total | awk '{print $3}')
+          echo "**Overall Coverage:** $COVERAGE" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Add detailed coverage table
+          echo "### Coverage by Package" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Package | Coverage |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|----------|" >> $GITHUB_STEP_SUMMARY
+          go tool cover -func=coverage.out | grep -v "total:" | awk '{print "| " $1 " " $2 " | " $3 " |"}' >> $GITHUB_STEP_SUMMARY
+        
       - name: Upload coverage to artifacts
         uses: actions/upload-artifact@v4
         with:
