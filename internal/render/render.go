@@ -44,7 +44,7 @@ func DeviceList(devices []bt.Device) {
 	s.WriteString("\n")
 	s.WriteString(infoStyle.Render("Enter the number of the device to select, or 'q' to cancel"))
 
-	lipgloss.Println(s.String())
+	_, _ = lipgloss.Println(s.String())
 }
 
 // ControllerList prints a styled list of controllers
@@ -63,5 +63,5 @@ func ControllerList(controllers []bt.Controller) {
 	s.WriteString("\n")
 	s.WriteString(infoStyle.Render("Enter the number of the controller to select, or 'q' to cancel"))
 
-	lipgloss.Println(s.String())
+	_, _ = lipgloss.Println(s.String())
 }

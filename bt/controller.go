@@ -17,7 +17,7 @@ func Controllers() ([]Controller, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to read bluetooth directory: %w", err)
 	}
-	defer root.Close()
+	defer func() { _ = root.Close() }()
 
 	files, err := fs.Glob(root.FS(), "*")
 	if err != nil {
@@ -30,7 +30,7 @@ func Controllers() ([]Controller, error) {
 		if err != nil {
 			continue
 		}
-		defer f.Close()
+		defer func() { _ = f.Close() }()
 
 		stat, err := f.Stat()
 		if err != nil {

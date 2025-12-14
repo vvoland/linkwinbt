@@ -21,7 +21,7 @@ func (c *Controller) Devices() ([]Device, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to read devices directory for controller %s: %w", c.Mac, err)
 	}
-	defer root.Close()
+	defer func() { _ = root.Close() }()
 
 	files, err := fs.Glob(root.FS(), "*")
 	if err != nil {
@@ -34,7 +34,7 @@ func (c *Controller) Devices() ([]Device, error) {
 		if err != nil {
 			continue
 		}
-		defer f.Close()
+		defer func() { _ = f.Close() }()
 
 		stat, err := f.Stat()
 		if err != nil {
@@ -50,7 +50,7 @@ func (c *Controller) Devices() ([]Device, error) {
 			if err != nil {
 				continue
 			}
-			defer infoFile.Close()
+			defer func() { _ = infoFile.Close() }()
 
 			info, err := io.ReadAll(infoFile)
 			if err != nil {
@@ -92,13 +92,13 @@ func (d *Device) SetLinkKey(linkKeyHex LinkKey) error {
 	if err != nil {
 		return fmt.Errorf("failed to open device directory: %w", err)
 	}
-	defer root.Close()
+	defer func() { _ = root.Close() }()
 
 	f, err := root.Open("info")
 	if err != nil {
 		return fmt.Errorf("failed to open device info file: %w", err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	stat, err := f.Stat()
 	if err != nil {
@@ -155,7 +155,7 @@ func (d *Device) SetLinkKey(linkKeyHex LinkKey) error {
 	if err != nil {
 		return fmt.Errorf("failed to write updated device info file: %w", err)
 	}
-	defer fw.Close()
+	defer func() { _ = fw.Close() }()
 
 	_, err = fw.Write([]byte(updatedInfo))
 	if err != nil {

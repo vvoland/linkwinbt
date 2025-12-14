@@ -31,7 +31,7 @@ func Open(path string) (*Registry, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer copyFile.Close()
+	defer func() { _ = copyFile.Close() }()
 
 	cmd := exec.Command("reged", "-x", copyFile.Name(), "\\ControlSet001\\Services\\BTHPORT\\Parameters\\Keys", "\\", "/dev/stdout")
 
@@ -53,7 +53,7 @@ func createTmpCopy(path string) (*os.File, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to open registry file: %w", err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	tmpCopy, err := os.CreateTemp("", "system-hive-*.reg")
 	if err != nil {
