@@ -4,6 +4,15 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to create release for (e.g., v1.0.0)'
+        required: true
+        type: string
+
+env:
+  TAG: ${{ inputs.tag || github.ref_name }}
 
 jobs:
   build:
@@ -14,6 +23,8 @@ jobs:
         include:
           - arch: amd64
           - arch: arm64
+    env:
+      NAME: "linkwinbt-linux-${{ matrix.arch }}"
     steps:
       - uses: actions/checkout@v6
 
@@ -21,17 +32,18 @@ jobs:
         run: |
           docker buildx build . \
             --target binary \
-            --build-arg TARGETOS=linux \
+            --build-arg TARGETOS=$OS \
             --build-arg TARGETARCH=${{ matrix.arch }} \
             --output type=local,dest=build \
             --cache-from type=gha \
             --cache-to type=gha,mode=max
+          mv ./build/linkwinbt ./build/${NAME}
 
       - name: Upload binary artifact
         uses: actions/upload-artifact@v6
         with:
-          name: linkwinbt-linux-${{ matrix.arch }}
-          path: build/linkwinbt*
+          name: ${{ env.NAME }}
+          path: build/${{ env.NAME }}
           retention-days: 1
 
   release:
@@ -52,13 +64,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG=${GITHUB_REF#refs/tags/}
           # Find all files in artifacts directory
           FILES=$(find artifacts -type f)
           echo "Files: ${FILES}"
 
           # Create release with all artifact files
-          echo "$FILES" | xargs gh release create "$TAG" \
-            --title "$TAG" \
+          echo "$FILES" | xargs gh release create "${{ env.TAG }}" \
+            --title "${{ env.TAG }}" \
             --draft \
             --generate-notes
