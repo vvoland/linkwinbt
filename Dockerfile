@@ -1,6 +1,8 @@
 # build
 FROM golang:1.25.5-alpine AS build
+ARG BUILDKIT_SBOM_SCAN_STAGE=true
 
+WORKDIR /out
 WORKDIR /src
 
 RUN --mount=type=cache,target=/go/pkg/mod \
@@ -16,14 +18,14 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=bind,source=. \
     CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build \
         -trimpath -buildvcs=false -ldflags="-s -w" \
-        -o /linkwinbt ./cmd/linkwinbt/main.go
+        -o /out ./...
 
 # binary
 FROM scratch AS binary
-COPY --from=build /linkwinbt /linkwinbt
+COPY --from=build /out/* /
 
 # final
 FROM alpine:latest AS final
 RUN apk add chntpw
-COPY --from=build /linkwinbt /linkwinbt
+COPY --from=build /out/linkwinbt /linkwinbt
 ENTRYPOINT ["/linkwinbt"]

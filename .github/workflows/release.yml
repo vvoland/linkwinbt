@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - 'v*'
+    branches:
+      - ci
   workflow_dispatch:
     inputs:
       tag:
@@ -30,20 +32,22 @@ jobs:
 
       - name: Build binary
         run: |
-          docker buildx build . \
-            --target binary \
-            --build-arg TARGETOS=$OS \
-            --build-arg TARGETARCH=${{ matrix.arch }} \
-            --output type=local,dest=build \
-            --cache-from type=gha \
-            --cache-to type=gha,mode=max
+          docker buildx create --use
+          docker buildx bake binary \
+            --set "*.platform=linux/${{ matrix.arch }}" \
+            --set "*.cache-from=type=gha,scope=${NAME}" \
+            --set "*.cache-to=type=gha,mode=max,scope=${NAME}"
           mv ./build/linkwinbt ./build/${NAME}
+          set -x
+          for file in ./build/*.json; do
+            mv "$file" "./build/${NAME}.$(basename "$file")"
+          done
 
       - name: Upload binary artifact
         uses: actions/upload-artifact@v6
         with:
           name: ${{ env.NAME }}
-          path: build/${{ env.NAME }}
+          path: build/*
           retention-days: 1
 
   release:
