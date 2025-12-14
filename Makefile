@@ -9,7 +9,9 @@ run: img
 
 .PHONY: img
 img:
-	docker build . -t vlnd/linkwinbt:$(TAG) -t vlnd/linkwinbt:latest
+	docker build . -t vlnd/linkwinbt:$(TAG) -t vlnd/linkwinbt:latest \
+		--attest type=provenance,mode=max --attest type=sbom \
+		-o type=image,compression=zstd
 
 .PHONY: publish
 publish: img
