@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
 
 jobs:
@@ -11,33 +11,41 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      
+
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
           go-version: '1.25.5'
           cache-dependency-path: go.sum
-      
+
       - name: Run tests with coverage
         run: go test -coverprofile=coverage.out -covermode=atomic ./...
-      
+
       - name: Generate coverage summary
         run: |
-          echo "## Test Coverage Report" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          
+          {
+            echo "## Test Coverage Report"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+
           # Get overall coverage
-          COVERAGE=$(go tool cover -func=coverage.out | grep total | awk '{print $3}')
-          echo "**Overall Coverage:** $COVERAGE" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          
-          # Add detailed coverage table
-          echo "### Coverage by Package" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Package | Coverage |" >> $GITHUB_STEP_SUMMARY
-          echo "|---------|----------|" >> $GITHUB_STEP_SUMMARY
-          go tool cover -func=coverage.out | grep -v "total:" | awk '{print "| " $1 " " $2 " | " $3 " |"}' >> $GITHUB_STEP_SUMMARY
-        
+          COVERAGE=$(go tool cover -func=coverage.out | \
+            grep total | \
+            awk '{print $3}' \
+          )
+          {
+            echo "**Overall Coverage:** $COVERAGE"
+            echo ""
+
+            echo "### Coverage by Package"
+            echo ""
+            echo "| Package | Coverage |"
+            echo "|---------|----------|"
+            go tool cover -func=coverage.out | \
+              grep -v "total:" | \
+              awk '{print "| " $1 " " $2 " | " $3 " |"}'
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Upload coverage to artifacts
         uses: actions/upload-artifact@v6
         with:
@@ -49,13 +57,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      
+
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
           go-version: '1.25.5'
           cache-dependency-path: go.sum
-      
+
       - name: Run go vet
         run: go vet ./...
 
@@ -64,18 +72,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      
+
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
           go-version: '1.25.5'
           cache-dependency-path: go.sum
-      
+
       - name: Install golangci-lint
         uses: golangci/golangci-lint-action@v9
         with:
           version: v2.7.2
-      
+
       - name: Run golangci-lint
         run: golangci-lint run ./...
 
@@ -84,26 +92,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      
+
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
           go-version: '1.25.5'
           cache-dependency-path: go.sum
-      
+
       - name: Run go mod tidy
         run: go mod tidy
-      
+
       - name: Check for changes
         run: |
-          git diff --exit-code go.mod go.sum || (echo "go.mod or go.sum has uncommitted changes after 'go mod tidy'" && exit 1)
+          git diff --exit-code go.mod go.sum || (
+            echo "go.mod or go.sum has uncommitted changes after 'go mod tidy'"
+            exit 1
+          )
 
   build:
     name: Build Binary
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      
+
       - name: Build binary target
         run: |
           docker buildx build . \
@@ -129,4 +140,3 @@ jobs:
             exit 1
           fi
           echo "✅ CI passed"
-

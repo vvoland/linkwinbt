@@ -41,7 +41,7 @@ jobs:
             --set "*.platform=linux/${{ matrix.arch }}" \
             --set "*.cache-from=type=gha,scope=${NAME}" \
             --set "*.cache-to=type=gha,mode=max,scope=${NAME}"
-          mv ./build/linkwinbt ./build/${NAME}
+          mv ./build/linkwinbt "./build/${NAME}"
           set -x
           for file in ./build/*.json; do
             mv "$file" "./build/${NAME}.$(basename "$file")"
