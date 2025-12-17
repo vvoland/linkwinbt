@@ -1,0 +1,11 @@
+name: Lint
+on:
+  pull_request:
+
+jobs:
+  lint:
+    name: Lint GHA
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - run: make -f lint.Makefile lint
