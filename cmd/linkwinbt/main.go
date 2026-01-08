@@ -166,10 +166,14 @@ func getUserSelection(prompt string, itemCount int) (int, error) {
 		return -1, errors.New("selection canceled")
 	}
 
-	idx, err := strconv.Atoi(input)
-	if err != nil || idx < 1 || idx > itemCount {
-		return -1, fmt.Errorf("invalid selection: %s", input)
+	num, err := strconv.Atoi(input)
+	if err != nil {
+		return -1, fmt.Errorf("invalid selection: not an integer: %s", input)
 	}
 
-	return idx, nil
+	if num < 0 || num >= itemCount {
+		return -1, fmt.Errorf("selection (%d) out of range, allowed range is 0-%d", num, itemCount)
+	}
+
+	return num, nil
 }
