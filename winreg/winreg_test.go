@@ -26,13 +26,13 @@ func TestGetBluetoothLinkKey(t *testing.T) {
 			name:          "missing controller",
 			controllerMAC: "ff:ee:dd:cc:bb:aa",
 			deviceMAC:     "aa:bb:cc:dd:ee:ff",
-			expectedErr:   "controller not found in registry",
+			expectedErr:   "controller (ff:ee:dd:cc:bb:aa) not found in the Windows registry",
 		},
 		{
 			name:          "missing device key",
 			controllerMAC: "00:11:22:33:44:55",
 			deviceMAC:     "ff:ff:ff:ff:ff:ff",
-			expectedErr:   "device not found in registry",
+			expectedErr:   "device (ff:ff:ff:ff:ff:ff) not found in the Windows registry",
 		},
 		{
 			name:          "valid key",

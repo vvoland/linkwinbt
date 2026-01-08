@@ -88,16 +88,13 @@ func createTmpCopy(path string) (*os.File, error) {
 // ```
 func (r *Registry) GetBluetoothLinkKey(controllerMAC, deviceMAC string) (string, error) {
 	// Normalize MAC addresses to Windows format (lowercase, no colons)
-	controllerMAC = normalizeMAC(controllerMAC)
-	deviceMAC = normalizeMAC(deviceMAC)
-
-	scanner := bufio.NewScanner(bytes.NewReader(r.dump.Bytes()))
+	searchSection := fmt.Sprintf("%s\\%s", "ControlSet001\\Services\\BTHPORT\\Parameters\\Keys", normalizeMAC(controllerMAC))
+	searchDevice := fmt.Sprintf(`"%s"=hex:`, normalizeMAC(deviceMAC))
 
 	controllerFound := false
-	searchSection := fmt.Sprintf("%s\\%s", "ControlSet001\\Services\\BTHPORT\\Parameters\\Keys", controllerMAC)
-	searchDevice := fmt.Sprintf(`"%s"=hex:`, deviceMAC)
-
 	inSection := false
+
+	scanner := bufio.NewScanner(bytes.NewReader(r.dump.Bytes()))
 	for scanner.Scan() {
 		line := scanner.Text()
 		line = strings.TrimSpace(line)
@@ -126,10 +123,10 @@ func (r *Registry) GetBluetoothLinkKey(controllerMAC, deviceMAC string) (string,
 	}
 
 	if !controllerFound {
-		return "", fmt.Errorf("controller not found in registry")
+		return "", fmt.Errorf("controller (%s) not found in the Windows registry", controllerMAC)
 	}
 
-	return "", fmt.Errorf("device not found in registry")
+	return "", fmt.Errorf("device (%s) not found in the Windows registry", deviceMAC)
 }
 
 func normalizeMAC(mac string) string {
