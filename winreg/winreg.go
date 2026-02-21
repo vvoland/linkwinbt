@@ -33,7 +33,7 @@ func Open(path string) (*Registry, error) {
 	}
 	defer func() { _ = copyFile.Close() }()
 
-	cmd := exec.Command("reged", "-x", copyFile.Name(), "\\ControlSet001\\Services\\BTHPORT\\Parameters\\Keys", "\\", "/dev/stdout")
+	cmd := exec.Command("reged", "-x", copyFile.Name(), "HKEY_LOCAL_MACHINE\\SYSTEM", "\\ControlSet001\\Services\\BTHPORT\\Parameters\\Keys", "/dev/stdout")
 
 	reg := &Registry{}
 
