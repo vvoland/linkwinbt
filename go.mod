@@ -3,7 +3,7 @@ module grono.dev/linkwinbt
 go 1.24.0
 
 require (
-	github.com/charmbracelet/lipgloss/v2 v2.0.0-beta1
+	github.com/charmbracelet/lipgloss/v2 v2.0.2
 	gotest.tools/v3 v3.5.2
 )
 
