@@ -48,14 +48,14 @@ jobs:
           done
 
       - name: Attest build provenance
-        uses: actions/attest@v3
+        uses: actions/attest@v4
         with:
           subject-path: build/${{ env.NAME }}
           predicate-type: https://slsa.dev/provenance/v0.2
           predicate-path: build/${{ env.NAME }}.provenance.json
 
       - name: Attest SBOM
-        uses: actions/attest@v3
+        uses: actions/attest@v4
         with:
           subject-path: build/${{ env.NAME }}
           predicate-type: https://spdx.dev/Document
