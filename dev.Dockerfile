@@ -2,7 +2,7 @@
 FROM golang:1.26.2-alpine AS golang
 
 # golangci-lint
-FROM golangci/golangci-lint:v2.12.0 AS golangci-lint
+FROM golangci/golangci-lint:v2.12.1 AS golangci-lint
 
 # base
 FROM golang AS base
