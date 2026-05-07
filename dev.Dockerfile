@@ -1,5 +1,5 @@
 # golang
-FROM golang:1.26.2-alpine AS golang
+FROM golang:1.26.3-alpine AS golang
 
 # golangci-lint
 FROM golangci/golangci-lint:v2.12.2 AS golangci-lint
