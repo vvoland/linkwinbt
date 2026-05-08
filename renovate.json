@@ -1,6 +1,17 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
-  ]
+    "config:recommended",
+    "helpers:pinGitHubActionDigestsToSemver",
+    "helpers:githubDigestChangelogs"
+  ],
+  "minimumReleaseAge": "3 days",
+  "packageRules": [
+    {
+      "description": "Group safe routine updates",
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "groupName": "routine dependency updates"
+    }
+  ],
+  "postUpdateOptions": ["gomodTidy"]
 }
