@@ -120,7 +120,7 @@ func pickController() (*bt.Controller, error) {
 
 	switch len(controllers) {
 	case 0:
-		return nil, fmt.Errorf("no controllers found")
+		return nil, errors.New("no controllers found")
 	case 1:
 		return &controllers[0], nil
 	default:
@@ -141,7 +141,7 @@ func pickDevice(controller *bt.Controller) (*bt.Device, error) {
 
 	switch len(devices) {
 	case 0:
-		return nil, fmt.Errorf("no devices found")
+		return nil, errors.New("no devices found")
 	case 1:
 		return &devices[0], nil
 	default:

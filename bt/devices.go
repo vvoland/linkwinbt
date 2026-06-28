@@ -1,6 +1,7 @@
 package bt
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"io/fs"
@@ -85,7 +86,7 @@ func (c *Controller) Devices() ([]Device, error) {
 
 func (d *Device) SetLinkKey(linkKeyHex LinkKey) error {
 	if d.controller == nil {
-		return fmt.Errorf("device not associated with a controller")
+		return errors.New("device not associated with a controller")
 	}
 
 	root, err := os.OpenRoot(filepath.Join(varLibBluetooth, d.controller.Mac, d.Mac))
@@ -146,7 +147,7 @@ func (d *Device) SetLinkKey(linkKeyHex LinkKey) error {
 	}
 
 	if !linkKeyFound {
-		return fmt.Errorf("link key not found in device info file")
+		return errors.New("link key not found in device info file")
 	}
 
 	// Write the updated info file
@@ -157,7 +158,7 @@ func (d *Device) SetLinkKey(linkKeyHex LinkKey) error {
 	}
 	defer func() { _ = fw.Close() }()
 
-	_, err = fw.Write([]byte(updatedInfo))
+	_, err = fw.WriteString(updatedInfo)
 	if err != nil {
 		return fmt.Errorf("failed to write updated device info file: %w", err)
 	}
