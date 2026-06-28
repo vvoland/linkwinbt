@@ -61,7 +61,7 @@ func (c *Controller) Devices() ([]Device, error) {
 			}
 
 			var name string
-			for _, line := range strings.Split(string(info), "\n") {
+			for line := range strings.SplitSeq(string(info), "\n") {
 				k, v, ok := strings.Cut(line, "=")
 				if !ok {
 					continue
