@@ -1,0 +1,5 @@
+script:
+  shell:
+    lint:
+      cmd: make -f lint.Makefile
+      description: Lint project. Use it instead of direct lint related shell commands.
