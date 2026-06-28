@@ -1,97 +1,103 @@
+---
 name: Release
 
 on:
   push:
     tags:
-      - 'v*'
-    branches:
-      - ci
+      - "v*"
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag to create release for (e.g., v1.0.0)'
+        description: Tag to create release for (e.g., v1.0.0)
         required: true
         type: string
 
 env:
+  BINARY_NAME: linkwinbt
   TAG: ${{ inputs.tag || github.ref_name }}
+  REPOSITORY: ${{ github.repository }}
+
+permissions:
+  contents: read
 
 jobs:
   build:
-    name: Build Binaries
-    runs-on: ubuntu-latest
+    name: Build binaries
     permissions:
-      id-token: write
       attestations: write
       contents: read
+      id-token: write
     strategy:
+      fail-fast: false
       matrix:
         include:
-          - arch: amd64
-          - arch: arm64
+          - os: linux
+            arch: amd64
+            ext: ""
+          - os: linux
+            arch: arm64
+            ext: ""
+    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     env:
-      NAME: "linkwinbt-linux-${{ matrix.arch }}"
+      NAME: linkwinbt-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }}
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Build binary
         run: |
           docker buildx create --use
           docker buildx bake binary \
-            --set "*.platform=linux/${{ matrix.arch }}" \
+            --set "*.platform=${{ matrix.os }}/${{ matrix.arch }}" \
             --set "*.cache-from=type=gha,scope=${NAME}" \
             --set "*.cache-to=type=gha,mode=max,scope=${NAME}"
-          mv ./build/linkwinbt "./build/${NAME}"
-          set -x
-          for file in ./build/*.json; do
-            mv "$file" "./build/${NAME}.$(basename "$file")"
+          mv "./_build/${{ env.BINARY_NAME }}${{ matrix.ext }}" "./_build/${NAME}"
+          for file in ./_build/*.json; do
+            mv "$file" "./_build/${NAME}.$(basename "$file")"
           done
 
       - name: Attest build provenance
         uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
         with:
-          subject-path: build/${{ env.NAME }}
+          subject-path: _build/${{ env.NAME }}
           predicate-type: https://slsa.dev/provenance/v0.2
-          predicate-path: build/${{ env.NAME }}.provenance.json
+          predicate-path: _build/${{ env.NAME }}.provenance.json
 
       - name: Attest SBOM
         uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
         with:
-          subject-path: build/${{ env.NAME }}
+          subject-path: _build/${{ env.NAME }}
           predicate-type: https://spdx.dev/Document
-          predicate-path: build/${{ env.NAME }}.sbom.spdx.json
+          predicate-path: _build/${{ env.NAME }}.sbom.spdx.json
 
       - name: Upload binary artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ env.NAME }}
-          path: build/*
+          path: _build/*
           retention-days: 1
 
   release:
-    name: Create Release
+    name: Create release
     needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-
       - name: Download all artifacts
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           path: artifacts
 
-      - name: Create Release
+      - name: Create GitHub release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Find all files in artifacts directory
-          FILES=$(find artifacts -type f)
-          echo "Files: ${FILES}"
-
-          # Create release with all artifact files
-          echo "$FILES" | xargs gh release create "${{ env.TAG }}" \
+          mapfile -t files < <(find artifacts -type f | sort)
+          printf 'Uploading files:\n%s\n' "${files[*]}"
+          gh release create "${{ env.TAG }}" \
+            --repo "${{ env.REPOSITORY }}" \
             --title "${{ env.TAG }}" \
             --draft \
-            --generate-notes
+            --generate-notes \
+            "${files[@]}"

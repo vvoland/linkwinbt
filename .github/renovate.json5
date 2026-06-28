@@ -11,6 +11,13 @@
       "description": "Group safe routine updates",
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "groupName": "routine dependency updates"
+    },
+    {
+      "description": "Allow gha-pin-diff to stay on semver tag instead of digest pinning",
+      "matchManagers": ["github-actions"],
+      "matchPackageNames": ["vvoland/gha-pin-diff"],
+      "pinDigests": false,
+      "enabled": false
     }
   ],
   "postUpdateOptions": ["gomodTidy"]
