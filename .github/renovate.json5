@@ -6,6 +6,48 @@
     "helpers:githubDigestChangelogs"
   ],
   "minimumReleaseAge": "3 days",
+  "customManagers": [
+    {
+      "description": "Track actionlint version in lint.Dockerfile",
+      "customType": "regex",
+      "managerFilePatterns": ["/^lint\\.Dockerfile$/"],
+      "matchStrings": ["ARG ACTIONLINT_VERSION=(?<currentValue>v?\\d+\\.\\d+\\.\\d+)\\n"],
+      "depNameTemplate": "github.com/rhysd/actionlint",
+      "datasourceTemplate": "go"
+    },
+    {
+      "description": "Track golangci-lint version in lint.Dockerfile",
+      "customType": "regex",
+      "managerFilePatterns": ["/^lint\\.Dockerfile$/"],
+      "matchStrings": ["ARG GOLANGCI_LINT_VERSION=(?<currentValue>v?\\d+\\.\\d+\\.\\d+)\\n"],
+      "depNameTemplate": "github.com/golangci/golangci-lint/v2",
+      "datasourceTemplate": "go"
+    },
+    {
+      "description": "Track modernize (gopls) version in lint.Dockerfile",
+      "customType": "regex",
+      "managerFilePatterns": ["/^lint\\.Dockerfile$/"],
+      "matchStrings": ["ARG MODERNIZE_VERSION=(?<currentValue>v?\\d+\\.\\d+\\.\\d+)\\n"],
+      "depNameTemplate": "golang.org/x/tools/gopls",
+      "datasourceTemplate": "go"
+    },
+    {
+      "description": "Track shfmt version in lint.Dockerfile",
+      "customType": "regex",
+      "managerFilePatterns": ["/^lint\\.Dockerfile$/"],
+      "matchStrings": ["ARG SHFMT_VERSION=(?<currentValue>v?\\d+\\.\\d+\\.\\d+)\\n"],
+      "depNameTemplate": "mvdan.cc/sh/v3",
+      "datasourceTemplate": "go"
+    },
+    {
+      "description": "Track yamllint version in lint.Dockerfile",
+      "customType": "regex",
+      "managerFilePatterns": ["/^lint\\.Dockerfile$/"],
+      "matchStrings": ["ARG YAMLLINT_VERSION=(?<currentValue>\\d+\\.\\d+\\.\\d+)\\n"],
+      "depNameTemplate": "yamllint",
+      "datasourceTemplate": "pypi"
+    }
+  ],
   "packageRules": [
     {
       "description": "Group safe routine updates",
