@@ -24,7 +24,7 @@ WORKDIR /work
 ENTRYPOINT ["/usr/local/bin/actionlint"]
 
 FROM golang-base AS build-golangci-lint
-ARG GOLANGCI_LINT_VERSION=v2.13.1
+ARG GOLANGCI_LINT_VERSION=v2.13.2
 ENV CGO_ENABLED=0 GOFLAGS=-trimpath
 RUN --mount=type=cache,id=go-build,target=/root/.cache/go-build \
     --mount=type=cache,id=go-mod,target=/go/pkg/mod \
@@ -55,7 +55,7 @@ FROM golang-tools AS modernize
 ENTRYPOINT ["/usr/local/bin/modernize"]
 
 FROM golang-base AS build-shfmt
-ARG SHFMT_VERSION=v3.13.1
+ARG SHFMT_VERSION=v3.14.0
 ENV CGO_ENABLED=0 GOFLAGS=-trimpath
 RUN --mount=type=cache,id=go-build,target=/root/.cache/go-build \
     --mount=type=cache,id=go-mod,target=/go/pkg/mod \
