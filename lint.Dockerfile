@@ -24,7 +24,7 @@ WORKDIR /work
 ENTRYPOINT ["/usr/local/bin/actionlint"]
 
 FROM golang-base AS build-golangci-lint
-ARG GOLANGCI_LINT_VERSION=v2.13.2
+ARG GOLANGCI_LINT_VERSION=v2.14.0
 ENV CGO_ENABLED=0 GOFLAGS=-trimpath
 RUN --mount=type=cache,id=go-build,target=/root/.cache/go-build \
     --mount=type=cache,id=go-mod,target=/go/pkg/mod \
