@@ -17,6 +17,7 @@ func TestDevices(t *testing.T) {
 	origVarLibBluetooth := varLibBluetooth
 	varLibBluetooth = tmpDir
 	defer func() { varLibBluetooth = origVarLibBluetooth }()
+
 	testMac := "11:22:33:44:55:66"
 	controllerDir := filepath.Join(tmpDir, testMac)
 	assert.NilError(t, os.MkdirAll(controllerDir, 0755))

@@ -29,7 +29,7 @@ You can read more about the exact steps in the [DESIGN.md](DESIGN.md) file.
 ### Prerequisites
 - A dual-boot Linux/Windows system
 - Bluetooth devices paired on **Linux FIRST** and then on Windows
-- Access to the Windows registry file (`C:\Windows\System32\config\SYSTEM`) 
+- Access to the Windows registry file (`C:\Windows\System32\config\SYSTEM`)
 - When not using Docker or Nix: `reged` installed on Linux (usually provided by the `chntpw` package)
 
 

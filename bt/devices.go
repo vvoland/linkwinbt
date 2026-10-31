@@ -3,6 +3,7 @@
 package bt
 
 import (
+	"crypto/rand"
 	"errors"
 	"fmt"
 	"io"
@@ -10,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"syscall"
 )
 
 type Device struct {
@@ -108,6 +110,15 @@ func (d *Device) SetLinkKey(linkKeyHex LinkKey) error {
 		return fmt.Errorf("failed to get device info file stats: %w", err)
 	}
 
+	if !stat.Mode().IsRegular() {
+		return errors.New("device info file is not a regular file")
+	}
+
+	owner, ok := stat.Sys().(*syscall.Stat_t)
+	if !ok {
+		return errors.New("failed to get device info file ownership")
+	}
+
 	// Read the current info file
 	infoData, err := io.ReadAll(f)
 	if err != nil {
@@ -152,17 +163,60 @@ func (d *Device) SetLinkKey(linkKeyHex LinkKey) error {
 		return errors.New("link key not found in device info file")
 	}
 
-	// Write the updated info file
 	updatedInfo := strings.Join(lines, "\n")
-	fw, err := root.OpenFile("info", os.O_WRONLY|os.O_TRUNC, stat.Mode())
+	tmpName := "info.tmp-" + rand.Text()
+
+	fw, err := root.OpenFile(tmpName, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o600)
 	if err != nil {
+		return fmt.Errorf("failed to create updated device info file: %w", err)
+	}
+
+	defer func() {
+		_ = fw.Close()
+		_ = root.Remove(tmpName)
+	}()
+
+	if _, err := fw.WriteString(updatedInfo); err != nil {
 		return fmt.Errorf("failed to write updated device info file: %w", err)
 	}
-	defer func() { _ = fw.Close() }()
 
-	_, err = fw.WriteString(updatedInfo)
+	if err := fw.Chown(int(owner.Uid), int(owner.Gid)); err != nil {
+		return fmt.Errorf("failed to preserve device info file ownership: %w", err)
+	}
+
+	if err := fw.Chmod(stat.Mode()); err != nil {
+		return fmt.Errorf("failed to preserve device info file permissions: %w", err)
+	}
+
+	if err := fw.Sync(); err != nil {
+		return fmt.Errorf("failed to sync updated device info file: %w", err)
+	}
+
+	if err := fw.Close(); err != nil {
+		return fmt.Errorf("failed to close updated device info file: %w", err)
+	}
+
+	current, err := root.Lstat("info")
 	if err != nil {
-		return fmt.Errorf("failed to write updated device info file: %w", err)
+		return fmt.Errorf("failed to check device info file before replacement: %w", err)
+	}
+
+	if !os.SameFile(stat, current) {
+		return errors.New("device info file changed during update or is a symbolic link")
+	}
+
+	if err := root.Rename(tmpName, "info"); err != nil {
+		return fmt.Errorf("failed to replace device info file: %w", err)
+	}
+
+	dir, err := root.Open(".")
+	if err != nil {
+		return fmt.Errorf("device info file updated, but failed to open directory for syncing: %w", err)
+	}
+	defer func() { _ = dir.Close() }()
+
+	if err := dir.Sync(); err != nil {
+		return fmt.Errorf("device info file updated, but failed to sync directory: %w", err)
 	}
 
 	return nil
