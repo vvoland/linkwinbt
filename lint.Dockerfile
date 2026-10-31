@@ -31,12 +31,11 @@ RUN --mount=type=cache,id=go-build,target=/root/.cache/go-build \
     go install "github.com/golangci/golangci-lint/v2/cmd/golangci-lint@${GOLANGCI_LINT_VERSION}"
 
 FROM golang-base AS build-modernize
-# modernize lives inside gopls; the version arg is a gopls release tag.
-ARG MODERNIZE_VERSION=v0.23.0
+ARG MODERNIZE_VERSION=v0.52.0
 ENV CGO_ENABLED=0 GOFLAGS=-trimpath
 RUN --mount=type=cache,id=go-build,target=/root/.cache/go-build \
     --mount=type=cache,id=go-mod,target=/go/pkg/mod \
-    go install "golang.org/x/tools/gopls/internal/analysis/modernize/cmd/modernize@${MODERNIZE_VERSION}"
+    go install "golang.org/x/tools/go/analysis/passes/modernize/cmd/modernize@${MODERNIZE_VERSION}"
 
 FROM golang-base AS golang-tools
 COPY --from=build-golangci-lint /go/bin/golangci-lint /usr/local/bin/golangci-lint
