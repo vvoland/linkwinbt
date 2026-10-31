@@ -83,7 +83,7 @@ func Open(path string) (*Registry, error) {
 		return nil, fmt.Errorf("failed to read Windows control set: %w", err)
 	}
 
-	return nil, errors.New("Windows control set not found: missing Select\\Current")
+	return nil, errors.New("windows control set not found: missing Select\\Current")
 }
 
 func export(path, key string) (*Registry, error) {
