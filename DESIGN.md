@@ -46,8 +46,19 @@ Which will list directories corresponding to the Bluetooth devices that have bee
 
 ### Dump BT Windows registry data
 
+First export `Select` to identify the control set used by Windows:
+
 ```bash
-reged -x <path-to-SYSTEM> "\ControlSet001\Services\BTHPORT\Parameters\Keys" '\\' tmp.reg
+reged -x /path/to/SYSTEM 'HKEY_LOCAL_MACHINE\SYSTEM' '\Select' select.reg
+```
+
+Read the `Current` DWORD under `HKEY_LOCAL_MACHINE\SYSTEM\Select`.
+Its hexadecimal value selects the control set, formatted as a decimal number with at least three digits: `dword:00000002` means `ControlSet002`.
+LinkWinBT resolves this value automatically and reports an error if it is missing or invalid.
+For that example, export the Bluetooth keys with:
+
+```bash
+reged -x /path/to/SYSTEM 'HKEY_LOCAL_MACHINE\SYSTEM' '\ControlSet002\Services\BTHPORT\Parameters\Keys' tmp.reg
 ```
 
 Note: `reged` is a tool to read the Windows registry on Linux, for some reason I couldn't use `chntpw` directly because it crashed with SIGSEGV.
@@ -57,7 +68,7 @@ Note: `reged` is a tool to read the Windows registry on Linux, for some reason I
 The dump will be full of crap, but we only care about contain something like:
 
 ```
-[\ControlSet001\Services\BTHPORT\Parameters\Keys\ControlSet001\Services\BTHPORT\Parameters\Keys\9cfce8b88606]
+[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet002\Services\BTHPORT\Parameters\Keys\9cfce8b88606]
 "7845ce0af692"=hex:c5,cc,96,ec,48,ee,88,8f,04,a8,63,34,4c,c6,a7,2d
 "98583d332bda"=hex:43,63,a8,89,a9,e3,1d,ef,05,b3,eb,35,bb,71,7b,19
 "c87b230bc130"=hex:be,92,93,99,aa,dc,0d,ff,69,88,9b,e8,cd,79,47,a7
@@ -67,7 +78,7 @@ Now, notice that this corresponds to:
 
 
 ```
-[\ControlSet001\Services\BTHPORT\Parameters\Keys\ControlSet001\Services\BTHPORT\Parameters\Keys\<controller-mac>]
+[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet002\Services\BTHPORT\Parameters\Keys\<controller-mac>]
 "<device1-mac>"=hex:9e,f1,4f,8c,b5,4d,8b,01,04,8f,4a,8f,4a,8f,4a,8f
 "<device2-mac>"=hex:c5,cc,96,ec,48,ee,88,8f,04,a8,63,34,4c,c6,a7,2d
 ...
