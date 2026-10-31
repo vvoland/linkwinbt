@@ -33,7 +33,10 @@ func Open(path string) (*Registry, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer func() { _ = copyFile.Close() }()
+	defer func() {
+		_ = copyFile.Close()
+		_ = os.Remove(copyFile.Name())
+	}()
 
 	cmd := exec.Command("reged", "-x", copyFile.Name(), "HKEY_LOCAL_MACHINE\\SYSTEM", "\\ControlSet001\\Services\\BTHPORT\\Parameters\\Keys", "/dev/stdout")
 
@@ -63,6 +66,9 @@ func createTmpCopy(path string) (*os.File, error) {
 	}
 
 	if _, err := io.Copy(tmpCopy, f); err != nil {
+		_ = tmpCopy.Close()
+		_ = os.Remove(tmpCopy.Name())
+
 		return nil, fmt.Errorf("failed to copy registry file: %w", err)
 	}
 
